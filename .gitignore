@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/BaseImageManager/BaseImageManager/bin/Release
+/BaseImageManager/BaseImageManager/bin/Debug
+/BaseImageManager/BaseImageManager/obj
