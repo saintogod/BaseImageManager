@@ -1,0 +1,1 @@
+This project is used to create a tool to manage the picture used in Nunit test cases
