@@ -63,6 +63,16 @@ namespace BaseImageManager.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap NightOfSky {
+            get {
+                object obj = ResourceManager.GetObject("NightOfSky", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap NotFound {
             get {
                 object obj = ResourceManager.GetObject("NotFound", resourceCulture);

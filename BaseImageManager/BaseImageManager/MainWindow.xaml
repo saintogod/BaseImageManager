@@ -1,39 +1,85 @@
 ﻿<Window x:Class="BaseImageManager.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:BaseImageManager"
         Title="MainWindow" Height="1038" Width="1122">
     <Window.Resources>
+        <Style TargetType="TreeViewItem">
+            <Setter Property="IsExpanded" Value="True"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="true">
+                    <Setter Property="Foreground" Value="Red"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <HierarchicalDataTemplate x:Key="ErrorItemTemplate" DataType="{x:Type local:ErrorItem}">
+            <StackPanel x:Name="errItem" Orientation="Horizontal" MouseLeftButtonUp="errItem_MouseUp" Tag="{Binding}">
+                <CheckBox x:Name="chb" ToolTip="{Binding Header}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Tag="{Binding ExpectedImg}"/>
+                <TextBlock x:Name="tb" Tag="{Binding CapturedImg}" Text="{Binding Header}" />
+            </StackPanel>
+            <HierarchicalDataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsChecked}" Value="true">
+                    <Setter TargetName="errItem" Property="Background" Value="Yellow"/>
+                </DataTrigger>
+            </HierarchicalDataTemplate.Triggers>
+        </HierarchicalDataTemplate>
+        
+        <HierarchicalDataTemplate x:Key="BrowserTemplate" DataType="{x:Type local:BrowserItem}"
+            ItemsSource="{Binding ErrorItems}" ItemTemplate="{StaticResource ErrorItemTemplate}">
+            <StackPanel x:Name="staTree" Orientation="Horizontal" Focusable="False">
+                <CheckBox ToolTip="{Binding Header}" IsChecked="{Binding IsChecked, Mode=TwoWay}" IsThreeState="True"/>
+                <TextBlock Text="{Binding Header}"/>
+            </StackPanel>
+            <HierarchicalDataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsChecked}" Value="true">
+                    <Setter TargetName="staTree" Property="Background" Value="Yellow"/>
+                </DataTrigger>
+            </HierarchicalDataTemplate.Triggers>
+        </HierarchicalDataTemplate>
     </Window.Resources>
 
     <DockPanel LastChildFill="True">
         <ToolBarPanel DockPanel.Dock="Top">
             <Menu>
                 <MenuItem Header="File">
-                    <MenuItem Header="Load"></MenuItem>
+                    <MenuItem Header="Load" x:Name="MI_Load" Click="LoadIndexFile_Click"></MenuItem>
+                    <MenuItem Header="Reset" x:Name="MI_Reset" Click="ResetIndexFile_Click"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Selection">
+                    <MenuItem Header="Select All" x:Name="MI_SelectAll" Click="SelectAll_Click"></MenuItem>
+                    <MenuItem Header="Clear Selection" x:Name="MI_ClearAll" Click="ClearSelection_Click"></MenuItem>
+                    <MenuItem Header="Select Others" x:Name="MI_SelectReverse" Click="SelectReverse_Click"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Operation">
-                    <MenuItem Header="Load SVNDiff"></MenuItem>
-                    <MenuItem Header="Apply new images"></MenuItem>
-                    <MenuItem Header="Commit in svn" ></MenuItem>
-                    <MenuItem Header="Reset"></MenuItem>
+                    <MenuItem Header="Load SVNDiff" x:Name="MI_ViewInSVN" Click="ViewInSVN_Click"></MenuItem>
+                    <MenuItem Header="Apply new images" x:Name="MI_ApplyNewImages" Click="ApplyNewImages_Click"></MenuItem>
+                    <MenuItem Header="Commit in svn" x:Name="MI_Commit" Click="CommitToSVN_Click"></MenuItem>
+                    <MenuItem Header="Revert" x:Name="MI_RevertChanges" Click="RevertChanges_Click"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Setting">
+                    <MenuItem Header="Setting" x:Name="MI_Setting" Click="Setting_Click"></MenuItem>
+                    <MenuItem Header="Clear History" x:Name="MI_ClearHistory" Click="ClearHistory_Click"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Help">
+                    <MenuItem Header="Usage"></MenuItem>
                     <MenuItem Header="About?"></MenuItem>
                 </MenuItem>
             </Menu>
             <ToolBarTray ToolBarTray.IsLocked="True">
                 <ToolBar x:Name="TB_File" Band="0" BandIndex="0">
-                    <Button x:Name="Load" ToolBar.OverflowMode="Never">Load</Button>
-                    <Button x:Name="Close" ToolBar.OverflowMode="Never">Close</Button>
+                    <Button x:Name="TB_Load" ToolBar.OverflowMode="Never" Content="Load" Click="LoadIndexFile_Click"/>
+                    <Button x:Name="TB_Reset" ToolBar.OverflowMode="Never" Content="Reset" Click="ResetIndexFile_Click" />
                 </ToolBar>
                 <ToolBar Band="0" BandIndex="1">
-                    <Button x:Name="SelctedAll" ToolBar.OverflowMode="Never">Select All</Button>
-                    <Button  ToolBar.OverflowMode="Never">Select None</Button>
-                    <Button ToolBar.OverflowMode="Never">Riverse</Button>
+                    <Button x:Name="TB_SelctedAll" ToolBar.OverflowMode="Never" Content="Select All" Click="SelectAll_Click"/>
+                    <Button x:Name="TB_ClearSelection" ToolBar.OverflowMode="Never" Content="Selete None" Click="ClearSelection_Click"/>
+                    <Button x:Name="TB_ReverseSelection" ToolBar.OverflowMode="Never" Content="Reverse" Click="SelectReverse_Click"/>
                 </ToolBar>
                 <ToolBar Band="0" BandIndex="2">
-                    <Button ToolBar.OverflowMode="Never">View In SVNDiff</Button>
-                    <Button ToolBar.OverflowMode="Never">Update Images</Button>
+                    <Button x:Name="TB_ViewInSVN" ToolBar.OverflowMode="Never" Content="View In SVNDiff" Click="ViewInSVN_Click"/>
+                    <Button x:Name="TB_CommitToSVN" ToolBar.OverflowMode="Never" Content="Update Images" Click="CommitToSVN_Click"/>
+                    <Button x:Name="TB_ApplyNewImages" ToolBar.OverflowMode="Never" Content="View In SVNDiff" Click="ApplyNewImages_Click"/>
                 </ToolBar>
                 <ToolBar Band="0" BandIndex="3">
                     <Button ToolBar.OverflowMode="Never">About</Button>
@@ -50,13 +96,13 @@
                 <ColumnDefinition Width="50*"/>
                 <ColumnDefinition Width="50*"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Background="YellowGreen" Grid.Column="0" Orientation="Horizontal" FlowDirection="RightToLeft">
+            <StackPanel Background="YellowGreen" Grid.Column="0" Orientation="Horizontal" FlowDirection="RightToLeft" x:Name="CapturedPicInfo">
                 <Label Content="Created Image Info:" />
-                <Label Content="Width * Height: 1024 * 800"/>
+                <Label x:Name="CapturedPicSizeInfo" />
             </StackPanel>
-            <StackPanel Background="Gainsboro" Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Background="Gainsboro" Grid.Column="1" Orientation="Horizontal" x:Name="ExpectPicInfo">
                 <Label Content="Base Image Info:" />
-                <Label Content="Width * Height: 1024 * 800"/>
+                <Label x:Name="ExpectedPicSizeInfo" Content="Width * Height: 1024 * 800"/>
             </StackPanel>
         </Grid>
         <Grid MinWidth="800">
@@ -64,12 +110,47 @@
                 <ColumnDefinition Width="150*" MinWidth="200" MaxWidth="300"/>
                 <ColumnDefinition Width="850*"/>
             </Grid.ColumnDefinitions>
-            <TreeView Grid.Column="0" Background="AliceBlue" HorizontalContentAlignment="Stretch" Margin="0,0,2,0"/>
-            <GridSplitter VerticalAlignment="Stretch" Width="2" Background="Red" Margin="0,0,0,0"/>
-            <Canvas Background="Aqua" Grid.ColumnSpan="1" Grid.Column="1">
-                <Image x:Name="TestImage" Canvas.Left="0" Canvas.Top="0" Canvas.Right="0" Canvas.Bottom="0" Stretch="Fill" Panel.ZIndex="1"/>
-                <Image x:Name="DiffImage" Width="100" Height="100" Canvas.Bottom="0" Canvas.Right="0" Stretch="Fill" Source="pack://application:,,,/Resources/NotFound.png" Panel.ZIndex="2"/>
-                <Image x:Name="BaseImage"  Width="100" Height="100" Canvas.Bottom="0" Canvas.Left="0" Stretch="Fill" Source="pack://application:,,,/Resources/NotFound.png" Panel.ZIndex="2"/>
+            <TreeView
+                x:Name="ErrorList" Grid.Column="0" Background="AliceBlue" 
+                HorizontalContentAlignment="Stretch" Margin="0,0,0,0" ItemTemplate="{StaticResource BrowserTemplate}">
+            </TreeView>
+            <GridSplitter VerticalAlignment="Stretch" Width="2" Margin="0,0,0,0"/>
+            <Canvas Grid.ColumnSpan="1" Grid.Column="1" x:Name="PictureInShow" MouseLeftButtonDown="PictureInShow_MouseLeftButtonUp">
+                <Canvas.ContextMenu>
+                    <ContextMenu Visibility="Hidden">
+                        <MenuItem Header="Copy" x:Name="CopyImage" Click="CopyImage_Click"/>
+                        <MenuItem Header="Copy File Path" x:Name="CopyImagePath" Click="CopyImagePath_Click"/>
+                        <MenuItem Header="Open" x:Name="OpenInImageViewer" Click="OpenInImageViewer_Click"/>
+                    </ContextMenu>
+                </Canvas.ContextMenu>
+                <Canvas.Background>
+                    <ImageBrush x:Name="MainImage" Stretch="Uniform" TileMode="Tile" ImageSource="Resources/NightOfSky.jpg"/>
+                </Canvas.Background>
+                <Canvas x:Name="CapturedImageCanvas" Width="128" Height="100" Canvas.Bottom="0" Canvas.Left="0" Panel.ZIndex="2" MouseLeftButtonDown="SmallImage_MouseLeftButtonUp">
+                    <Canvas.ContextMenu>
+                        <ContextMenu Visibility="Hidden"/>
+                    </Canvas.ContextMenu>
+                    <Canvas.Background>
+                        <ImageBrush x:Name="DiffPIC" Stretch="Uniform" TileMode="Tile" ImageSource="Resources/NotFound.png"/>
+                    </Canvas.Background>
+                </Canvas>
+                <Canvas x:Name="ExpectedImageCanvas" Width="128" Height="100" Canvas.Bottom="0" Canvas.Right="0" Panel.ZIndex="2" MouseLeftButtonDown="SmallImage_MouseLeftButtonUp" >
+                    <Canvas.ContextMenu>
+                        <ContextMenu Visibility="Hidden"/>
+                    </Canvas.ContextMenu>
+                    <Canvas.Background>
+                        <ImageBrush x:Name="ExpectPIC" Stretch="Uniform" TileMode="Tile" ImageSource="Resources/NotFound.png">
+                            <ImageBrush.RelativeTransform>
+                                <TransformGroup>
+                                    <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                    <SkewTransform CenterY="0.5" CenterX="0.5"/>
+                                    <RotateTransform CenterY="0.5" CenterX="0.5"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </ImageBrush.RelativeTransform>
+                        </ImageBrush>
+                    </Canvas.Background>
+                </Canvas>
             </Canvas>
         </Grid>
     </DockPanel>
