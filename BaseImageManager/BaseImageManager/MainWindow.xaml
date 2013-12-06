@@ -78,8 +78,8 @@
                 </ToolBar>
                 <ToolBar Band="0" BandIndex="2">
                     <Button x:Name="TB_ViewInSVN" ToolBar.OverflowMode="Never" Content="View In SVNDiff" Click="ViewInSVN_Click"/>
-                    <Button x:Name="TB_CommitToSVN" ToolBar.OverflowMode="Never" Content="Update Images" Click="CommitToSVN_Click"/>
-                    <Button x:Name="TB_ApplyNewImages" ToolBar.OverflowMode="Never" Content="View In SVNDiff" Click="ApplyNewImages_Click"/>
+                    <Button x:Name="TB_CommitToSVN" ToolBar.OverflowMode="Never" Content="Update Images to SVN" Click="CommitToSVN_Click"/>
+                    <Button x:Name="TB_ApplyNewImages" ToolBar.OverflowMode="Never" Content="Apply Selected Images" Click="ApplyNewImages_Click"/>
                 </ToolBar>
                 <ToolBar Band="0" BandIndex="3">
                     <Button ToolBar.OverflowMode="Never">About</Button>

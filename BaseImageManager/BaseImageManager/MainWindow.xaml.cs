@@ -53,7 +53,6 @@ namespace BaseImageManager
             ofd.RestoreDirectory = false;
             ofd.Title = "Open Test Result Index File";
             ofd.InitialDirectory = DefaultIndexFilePath;
-            bussiness.LoadIndexFile(@"D:\Workspace\BSI\WAResultImageIndex.xml", out failedTests);
             ErrorList.Items.Clear();
             ErrorList.ItemsSource = failedTests;
         }
@@ -82,8 +81,7 @@ namespace BaseImageManager
             var result = ofd.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                bussiness.LoadIndexFile(ofd.FileName, out failedTests); 
-                ErrorList.Items.Clear();
+                bussiness.LoadIndexFile(ofd.FileName, out failedTests);
                 ErrorList.ItemsSource = failedTests;
             }
         }
@@ -146,7 +144,23 @@ namespace BaseImageManager
                 DiffPIC.ImageSource = new BitmapImage(new Uri(diff, UriKind.Absolute));
             }
         }
-
+        private BitmapImage LoadImage(string myImageFile)
+        {
+            BitmapImage myRetVal = null;
+            if (myImageFile != null)
+            {
+                BitmapImage image = new BitmapImage();
+                using (FileStream stream = File.OpenRead(myImageFile))
+                {
+                    image.BeginInit();
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.StreamSource = stream;
+                    image.EndInit();
+                }
+                myRetVal = image;
+            }
+            return myRetVal;
+        }
         private void PictureInShow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount >= 2)
@@ -159,7 +173,7 @@ namespace BaseImageManager
                     }
                     else
                     {
-                        MainImage.ImageSource = new BitmapImage(new Uri((ErrorList.SelectedItem as ErrorItem).CapturedImg, UriKind.Absolute));
+                        MainImage.ImageSource = LoadImage((ErrorList.SelectedItem as ErrorItem).CapturedImg);
                         CapturedImageCanvas.Visibility = System.Windows.Visibility.Visible;
                         ExpectedImageCanvas.Visibility = System.Windows.Visibility.Visible;
                     }
