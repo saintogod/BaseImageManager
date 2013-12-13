@@ -2,7 +2,13 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BaseImageManager.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="IndexFilePath" Type="System.String" Scope="User">
+    <Setting Name="BaseImageFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\AutoTestFiles\WebAdmin\Screenshots</Value>
+    </Setting>
+    <Setting Name="LastOpenFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="HistoryFiles" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

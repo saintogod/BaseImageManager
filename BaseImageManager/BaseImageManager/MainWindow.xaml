@@ -44,6 +44,8 @@
             <Menu>
                 <MenuItem Header="File">
                     <MenuItem Header="Load" x:Name="MI_Load" Click="LoadIndexFile_Click"></MenuItem>
+                    <MenuItem Header="Recent File" x:Name="MI_Recent">
+                    </MenuItem>
                     <MenuItem Header="Reset" x:Name="MI_Reset" Click="ResetIndexFile_Click"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Selection">

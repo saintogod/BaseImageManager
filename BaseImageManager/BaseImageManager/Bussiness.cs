@@ -51,9 +51,17 @@ namespace BaseImageManager
             return msg.ToString();
         }
 
-        public void CommitToSVN()
+        public void CommitToSVN(string svnFolder)
         {
-
+            using (var process = new Process())
+            {
+                process.StartInfo = new ProcessStartInfo()
+                {
+                    FileName = "TortoiseProc.exe",
+                    Arguments = string.Format(@"/command:commit /path:""{0}""", svnFolder)
+                };
+                process.Start();
+            }
         }
 
         public void OpenImage(string imagePath)

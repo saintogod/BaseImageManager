@@ -16,30 +16,56 @@ namespace BaseImageManager
     public partial class MainWindow : Window
     {
         static OpenFileDialog ofd = new OpenFileDialog();
-        string _defaultIndexFile = Properties.Settings.Default.IndexFilePath;
+        string _baseImageFolder = Properties.Settings.Default.BaseImageFolder;
+        string _lastOpenFolder = Properties.Settings.Default.LastOpenFolder;
         IEnumerable<BrowserItem> failedTests;
         object lockobj = new object();
         Bussiness bussiness = new Bussiness();
-        public string DefaultIndexFilePath {
-            get {
+
+        public string BaseImageFolder
+        {
+            get
+            {
                 lock (lockobj)
                 {
                     if (string.IsNullOrEmpty(_defaultIndexFile))
-                        DefaultIndexFilePath = System.IO.Path.Combine(Environment.GetEnvironmentVariable("TEMP"), "WAResultImageIndex.xml");
-                    return _defaultIndexFile; 
+                        BaseImageFolder = @"C:\AutoTestFiles\WebAdmin\Screenshots";
+                    return _defaultIndexFile;
                 }
             }
-            set {
-
+            set
+            {
                 lock (lockobj)
                 {
                     _defaultIndexFile = value;
-                    Properties.Settings.Default.IndexFilePath = value;
+                    Properties.Settings.Default.BaseImageFolder = value;
                     Properties.Settings.Default.Save();
                 }
-
             }
         }
+
+        public string LastOpenFolder
+        {
+            get
+            {
+                lock (lockobj)
+                {
+                    if (string.IsNullOrEmpty(_lastOpenFolder))
+                        LastOpenFolder = Environment.GetEnvironmentVariable("TEMP");
+                    return _lastOpenFolder;
+                }
+            }
+            set
+            {
+                lock (lockobj)
+                {
+                    _lastOpenFolder = value;
+                    Properties.Settings.Default.LastOpenFolder = value;
+                    Properties.Settings.Default.Save();
+                }
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -52,11 +78,16 @@ namespace BaseImageManager
             ofd.Filter = "TestResultFile(.xml)|*.xml";
             ofd.RestoreDirectory = false;
             ofd.Title = "Open Test Result Index File";
-            ofd.InitialDirectory = DefaultIndexFilePath;
+            ofd.InitialDirectory = LastOpenFolder;
+            ofd.FileName = "WAResultImageIndex";
             ErrorList.Items.Clear();
             ErrorList.ItemsSource = failedTests;
         }
 
+        private void HistoryItem_Click(object sender, RoutedEventArgs e)
+        {
+            bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), out failedTests);
+        }
         private void SelectAll_Click(object sender, RoutedEventArgs e)
         {
             foreach (BrowserItem bi in ErrorList.Items)
@@ -82,7 +113,6 @@ namespace BaseImageManager
             if (result.HasValue && result.Value)
             {
                 bussiness.LoadIndexFile(ofd.FileName, out failedTests);
-                ErrorList.ItemsSource = failedTests;
             }
         }
 
@@ -107,7 +137,7 @@ namespace BaseImageManager
 
         private void CommitToSVN_Click(object sender, RoutedEventArgs e)
         {
-
+            bussiness.CommitToSVN(BaseImageFolder);
         }
 
         private void RevertChanges_Click(object sender, RoutedEventArgs e)
@@ -128,7 +158,7 @@ namespace BaseImageManager
         private void errItem_MouseUp(object sender, MouseButtonEventArgs e)
         {
             var errorInfo = (sender as StackPanel).Tag as ErrorItem;
-            ExpectPIC.ImageSource = new BitmapImage(new Uri(errorInfo.ExpectedImg, UriKind.Absolute));
+            ExpectPIC.ImageSource = LoadImage(errorInfo.ExpectedImg);
             ExpectedPicSizeInfo.Content = string.Format("Width * Height : {0:####} * {1:####} ", ExpectPIC.ImageSource.Width, ExpectPIC.ImageSource.Height);
 
             MainImage.ImageSource = new BitmapImage(new Uri(errorInfo.CapturedImg, UriKind.Absolute));
