@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -117,6 +118,29 @@ namespace BaseImageManager
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(info));
             }
+        }
+    }
+
+    public class QuickAccessItem
+    {
+        public string Title { get; private set; }
+        public string Name { get; private set; }
+        public string DirectoryPath { get; private set; }
+        public List<string> Items { get; private set; }
+
+        public QuickAccessItem(string title, string directory)
+        {
+            Title = title;
+            Name = string.Format("MI_{0}", title.Replace(' ', '_'));
+            DirectoryPath = directory;
+            Items = GetItems();
+        }
+        private List<string> GetItems() 
+        {
+            //if (!Directory.Exists(DirectoryPath))
+            //    return new List<string>();
+            //TODO find the newest LIst
+            return new List<string>(new[] { @"A:\aset0", @"A:\aset1", @"A:\aset2" });
         }
     }
 }

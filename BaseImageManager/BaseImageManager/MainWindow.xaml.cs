@@ -7,6 +7,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Linq;
+using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 
 namespace BaseImageManager
 {
@@ -19,31 +22,32 @@ namespace BaseImageManager
         string _baseImageFolder = Properties.Settings.Default.BaseImageFolder;
         string _lastOpenFolder = Properties.Settings.Default.LastOpenFolder;
         IEnumerable<BrowserItem> failedTests;
+        public ObservableCollection<string> HistoryList;
         object lockobj = new object();
         Bussiness bussiness = new Bussiness();
-
+        readonly int MaxHistoryCount = 10;
         public string BaseImageFolder
         {
             get
             {
                 lock (lockobj)
                 {
-                    if (string.IsNullOrEmpty(_defaultIndexFile))
+                    if (string.IsNullOrEmpty(_baseImageFolder))
                         BaseImageFolder = @"C:\AutoTestFiles\WebAdmin\Screenshots";
-                    return _defaultIndexFile;
+                    return _baseImageFolder;
                 }
             }
             set
             {
                 lock (lockobj)
                 {
-                    _defaultIndexFile = value;
+                    _baseImageFolder = value;
                     Properties.Settings.Default.BaseImageFolder = value;
                     Properties.Settings.Default.Save();
                 }
             }
         }
-
+        public ObservableCollection<QuickAccessItem> QuickAccessList;
         public string LastOpenFolder
         {
             get
@@ -66,6 +70,7 @@ namespace BaseImageManager
             }
         }
 
+
         public MainWindow()
         {
             InitializeComponent();
@@ -73,6 +78,8 @@ namespace BaseImageManager
         }
         private void CustomInit()
         {
+            MI_QuickAccess.Items.Clear();
+            MI_QuickAccess.ItemsSource = HistoryList;
             ofd.CheckPathExists = true;
             ofd.CheckFileExists = true;
             ofd.Filter = "TestResultFile(.xml)|*.xml";
@@ -82,11 +89,62 @@ namespace BaseImageManager
             ofd.FileName = "WAResultImageIndex";
             ErrorList.Items.Clear();
             ErrorList.ItemsSource = failedTests;
-        }
 
+            HistoryList = new ObservableCollection<string>(Properties.Settings.Default.HistoryFiles.Cast<string>());
+            MI_Recent.ItemsSource = HistoryList;
+
+            QuickAccessList = new ObservableCollection<QuickAccessItem>();
+            QuickAccessList.Add(new QuickAccessItem("Heelo", "C:\\c"));
+            //MI_QuickAccess.ItemsSource = QuickAccessList;
+            BuildQuickAccess();
+        }
+        private void BuildQuickAccess()
+        {
+            foreach (var item in QuickAccessList)
+            {
+                var menu = new MenuItem();
+                menu.Header = item.Title;
+                foreach (var file in item.Items)
+                {
+                    var subMenu = new MenuItem() { Header = file };
+                    subMenu.Click += QuickAccess_Click;
+                    menu.Items.Add(subMenu);
+                }
+                MI_QuickAccess.Items.Add(menu);
+            }
+
+        }
+        private void AddHistoryItem(string filePath) {
+            var curItem = HistoryList.Where(item => item.Equals(filePath, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+            if (curItem != null)
+            {
+                var index = HistoryList.IndexOf(curItem);
+                if (index != 0)
+                    HistoryList.Move(index, 0);
+            }
+            else
+            {
+                if (HistoryList.Count < MaxHistoryCount)
+                    HistoryList.Add(filePath);
+                else
+                {
+                    HistoryList.RemoveAt(MaxHistoryCount - 1);
+                    HistoryList.Insert(0,filePath);
+                }
+            }
+            Properties.Settings.Default.HistoryFiles.Clear();
+            Properties.Settings.Default.HistoryFiles.AddRange(HistoryList.ToArray());
+            Properties.Settings.Default.Save();
+        }
         private void HistoryItem_Click(object sender, RoutedEventArgs e)
         {
-            bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), out failedTests);
+            //bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), out failedTests);
+            AddHistoryItem(((MenuItem)sender).Header.ToString());
+        }
+        private void QuickAccess_Click(object sender, RoutedEventArgs e)
+        {
+            //bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), out failedTests);
+
         }
         private void SelectAll_Click(object sender, RoutedEventArgs e)
         {
@@ -113,6 +171,7 @@ namespace BaseImageManager
             if (result.HasValue && result.Value)
             {
                 bussiness.LoadIndexFile(ofd.FileName, out failedTests);
+                AddHistoryItem(ofd.FileName);
             }
         }
 
@@ -237,6 +296,11 @@ namespace BaseImageManager
         {
             var img = MainImage.ImageSource as BitmapSource;
             bussiness.OpenImage(img.ToString());
+        }
+
+        private void MenuItem_MouseEnter(object sender, MouseEventArgs e)
+        {
+
         }
     }
 }
