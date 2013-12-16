@@ -83,7 +83,7 @@ namespace BaseImageManager
             ofd.CheckPathExists = true;
             ofd.CheckFileExists = true;
             ofd.Filter = "TestResultFile(.xml)|*.xml";
-            ofd.RestoreDirectory = false;
+            ofd.RestoreDirectory = true;
             ofd.Title = "Open Test Result Index File";
             ofd.InitialDirectory = LastOpenFolder;
             ofd.FileName = "WAResultImageIndex";
@@ -171,6 +171,7 @@ namespace BaseImageManager
             if (result.HasValue && result.Value)
             {
                 bussiness.LoadIndexFile(ofd.FileName, out failedTests);
+                ErrorList.ItemsSource = failedTests;
                 AddHistoryItem(ofd.FileName);
             }
         }
