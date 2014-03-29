@@ -56,13 +56,6 @@
                 </MenuItem.ItemTemplate>
             </MenuItem>
         </DataTemplate>
-        <DataTemplate DataType="{x:Type local:QuickAccessItem}" x:Key="QuickAccessItemMenu2">
-            <MenuItem Header="{Binding Title}" Click="QuickAccess_Click" MouseEnter="MenuItem_MouseEnter">
-                <MenuItem Header="HeHe" />
-                <MenuItem Header="HeHe2" />
-                <MenuItem Header="HeHe5" />
-            </MenuItem>
-        </DataTemplate>
     </Window.Resources>
 
     <DockPanel LastChildFill="True">
@@ -82,11 +75,10 @@
                         <!-- ItemTemplate="{StaticResource QuickAccessItemMenu}"-->
                         
                     </MenuItem>
-                    <MenuItem Header="Reset" x:Name="MI_Reset" Click="ResetIndexFile_Click">
-                        <MenuItem Header="1">
-                            <MenuItem Header="2"/>
-                        </MenuItem>
+                    <MenuItem Header="Reload" x:Name="MI_Reload" Click="ReloadIndexFile_Click">
                     </MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Exit" x:Name="MI_Exit" Click="MI_Exit_Click"/>
                 </MenuItem>
                 <MenuItem Header="Selection">
                     <MenuItem Header="Select All" x:Name="MI_SelectAll" Click="SelectAll_Click"></MenuItem>
@@ -111,7 +103,7 @@
             <ToolBarTray ToolBarTray.IsLocked="True">
                 <ToolBar x:Name="TB_File" Band="0" BandIndex="0">
                     <Button x:Name="TB_Load" ToolBar.OverflowMode="Never" Content="Load" Click="LoadIndexFile_Click"/>
-                    <Button x:Name="TB_Reset" ToolBar.OverflowMode="Never" Content="Reset" Click="ResetIndexFile_Click" />
+                    <Button x:Name="TB_Reset" ToolBar.OverflowMode="Never" Content="Reload" Click="ReloadIndexFile_Click" />
                 </ToolBar>
                 <ToolBar Band="0" BandIndex="1">
                     <Button x:Name="TB_SelctedAll" ToolBar.OverflowMode="Never" Content="Select All" Click="SelectAll_Click"/>

@@ -1,15 +1,17 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Linq;
-using System.Collections.Specialized;
-using System.Collections.ObjectModel;
+using Microsoft.Win32;
 
 namespace BaseImageManager
 {
@@ -21,11 +23,12 @@ namespace BaseImageManager
         static OpenFileDialog ofd = new OpenFileDialog();
         string _baseImageFolder = Properties.Settings.Default.BaseImageFolder;
         string _lastOpenFolder = Properties.Settings.Default.LastOpenFolder;
-        IEnumerable<BrowserItem> failedTests;
+        BindingList<BrowserItem> failedTests;
+
         public ObservableCollection<string> HistoryList;
         object lockobj = new object();
         Bussiness bussiness = new Bussiness();
-        readonly int MaxHistoryCount = 10;
+        readonly int MaxHistoryCount = Properties.Settings.Default.MaxHistory;
         public string BaseImageFolder
         {
             get
@@ -70,7 +73,6 @@ namespace BaseImageManager
             }
         }
 
-
         public MainWindow()
         {
             InitializeComponent();
@@ -78,6 +80,7 @@ namespace BaseImageManager
         }
         private void CustomInit()
         {
+            failedTests = new BindingList<BrowserItem>();
             MI_QuickAccess.Items.Clear();
             MI_QuickAccess.ItemsSource = HistoryList;
             ofd.CheckPathExists = true;
@@ -94,9 +97,47 @@ namespace BaseImageManager
             MI_Recent.ItemsSource = HistoryList;
 
             QuickAccessList = new ObservableCollection<QuickAccessItem>();
-            QuickAccessList.Add(new QuickAccessItem("Heelo", "C:\\c"));
             //MI_QuickAccess.ItemsSource = QuickAccessList;
+            //InitConfigFile();
+            GetQuickAccessList();
             BuildQuickAccess();
+        }
+        public void GetQuickAccessList()
+        {
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            try
+            {
+                var qa = config.Sections["QuickAccessSection"] as QuickAccessSection;
+                if(qa!= null && qa.QuickAccessArray.Count > 0)
+                    foreach (QuickAccessItem item in qa.QuickAccessArray)
+                    {
+                        QuickAccessList.Add(item);
+                    }
+            }
+            catch (Exception)
+            {  }
+        }
+        private ObservableCollection<QuickAccessItem> InitConfigFile()
+        {
+            try
+            {
+                var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                //var group = new ConfigurationSectionGroup();
+                //config.SectionGroups.Add("QuickAccessGroup", group);
+                var list =new QuickAccessCollectoin();
+                list.Add(new QuickAccessItem() { Title = "Hello1", BaseDir = @"D:\Workspace\BSI", SearchRule = "*WAResultImageIndex.xml" });
+                list.Add(new QuickAccessItem() { Title = "Hello2", BaseDir = @"D:\Workspace\BSI", SearchRule = "*WAResultImageIndex.xml" });
+
+                config.Sections.Add("QuickAccessSection", new QuickAccessSection() { QuickAccessArray = list });
+
+                config.Save(ConfigurationSaveMode.Modified);
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
+            return null;
         }
         private void BuildQuickAccess()
         {
@@ -104,11 +145,16 @@ namespace BaseImageManager
             {
                 var menu = new MenuItem();
                 menu.Header = item.Title;
-                foreach (var file in item.Items)
+                if (item.Items.Count == 0)
+                    menu.Items.Add(new MenuItem() { Header = "Can't find any matched file.", IsEnabled = false });
+                else
                 {
-                    var subMenu = new MenuItem() { Header = file };
-                    subMenu.Click += QuickAccess_Click;
-                    menu.Items.Add(subMenu);
+                    foreach (var file in item.Items)
+                    {
+                        var subMenu = new MenuItem() { Header = file };
+                        subMenu.Click += QuickAccess_Click;
+                        menu.Items.Add(subMenu);
+                    }
                 }
                 MI_QuickAccess.Items.Add(menu);
             }
@@ -124,13 +170,10 @@ namespace BaseImageManager
             }
             else
             {
-                if (HistoryList.Count < MaxHistoryCount)
-                    HistoryList.Add(filePath);
-                else
-                {
-                    HistoryList.RemoveAt(MaxHistoryCount - 1);
-                    HistoryList.Insert(0,filePath);
-                }
+                HistoryList.Insert(0, filePath);
+                if (HistoryList.Count > MaxHistoryCount)
+                    HistoryList.RemoveAt(MaxHistoryCount);
+                
             }
             Properties.Settings.Default.HistoryFiles.Clear();
             Properties.Settings.Default.HistoryFiles.AddRange(HistoryList.ToArray());
@@ -138,13 +181,13 @@ namespace BaseImageManager
         }
         private void HistoryItem_Click(object sender, RoutedEventArgs e)
         {
-            //bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), out failedTests);
+            bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), failedTests);
             AddHistoryItem(((MenuItem)sender).Header.ToString());
         }
         private void QuickAccess_Click(object sender, RoutedEventArgs e)
         {
-            //bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), out failedTests);
-
+            bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), failedTests);
+            AddHistoryItem(((MenuItem)sender).Header.ToString());
         }
         private void SelectAll_Click(object sender, RoutedEventArgs e)
         {
@@ -170,15 +213,16 @@ namespace BaseImageManager
             var result = ofd.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                bussiness.LoadIndexFile(ofd.FileName, out failedTests);
+                bussiness.LoadIndexFile(ofd.FileName, failedTests);
                 ErrorList.ItemsSource = failedTests;
                 AddHistoryItem(ofd.FileName);
             }
         }
 
-        private void ResetIndexFile_Click(object sender, RoutedEventArgs e)
+        private void ReloadIndexFile_Click(object sender, RoutedEventArgs e)
         {
-
+            bussiness.LoadIndexFile(HistoryList.First(), failedTests);
+            ErrorList.ItemsSource = failedTests;
         }
 
         private void ViewInSVN_Click(object sender, RoutedEventArgs e)
@@ -207,12 +251,14 @@ namespace BaseImageManager
 
         private void Setting_Click(object sender, RoutedEventArgs e)
         {
-
+            var setting = new Setting(QuickAccessList);
+            setting.ShowDialog();
         }
 
         private void ClearHistory_Click(object sender, RoutedEventArgs e)
         {
-
+            Properties.Settings.Default.HistoryFiles.Clear();
+            Properties.Settings.Default.Save();
         }
 
         private void errItem_MouseUp(object sender, MouseButtonEventArgs e)
@@ -300,6 +346,11 @@ namespace BaseImageManager
         }
 
         private void MenuItem_MouseEnter(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void MI_Exit_Click(object sender, RoutedEventArgs e)
         {
 
         }

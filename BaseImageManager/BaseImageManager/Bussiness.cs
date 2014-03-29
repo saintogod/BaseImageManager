@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,11 +14,11 @@ namespace BaseImageManager
     internal class Bussiness
     {
         Regex expectedIMG = new Regex(@"\\(?<browser>(Chrome|IE9|IE10|Firefox))\\(?<picName>.+).png$");
-        public void LoadIndexFile(string indexFile, out IEnumerable<BrowserItem> failedTests)
+        public void LoadIndexFile(string indexFile, BindingList<BrowserItem> failedTests)
         {
             var xdoc = XDocument.Load(indexFile);
-
-            failedTests = from item in xdoc.Root.Elements("TestResult")
+            failedTests.Clear();
+            var list = from item in xdoc.Root.Elements("TestResult")
                           where item.Element("Matched").Value == "false"
                           group item by expectedIMG.Match(item.Element("ExpectedPic").Value).Groups["browser"].Value into g
                           select new BrowserItem(g.Key, (from node in g
@@ -28,9 +29,13 @@ namespace BaseImageManager
                                                              CapturedImg = node.Element("ResultPic").Value,
                                                              Header = expectedIMG.Match(picName).Groups["picName"].Value
                                                          }));
+            foreach (var item in list)
+            {
+                failedTests.Add(item);
+            }
         }
 
-        public string ApplyImages(IEnumerable<BrowserItem> failedTests)
+        public string ApplyImages(BindingList<BrowserItem> failedTests)
         {
             var testToUpdate = failedTests.SelectMany(browser => browser.ErrorItems.Where(item => item.IsChecked));
             int failedToUpdate = 0;
@@ -75,7 +80,6 @@ namespace BaseImageManager
 
         public void ViewInSvnDiff( string capturedImage,string expectedImage)
         {
-
                 using (var process = new Process())
                 {
                     process.StartInfo = new ProcessStartInfo()
@@ -85,7 +89,6 @@ namespace BaseImageManager
                     };
                     process.Start();
                 }
-            
         }
 
     }
