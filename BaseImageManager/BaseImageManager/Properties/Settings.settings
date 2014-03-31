@@ -8,13 +8,6 @@
     <Setting Name="LastOpenFolder" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="HistoryFiles" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;string&gt;D:\abc.xml&lt;/string&gt;
-  &lt;string&gt;C:\aaa.cml&lt;/string&gt;
-&lt;/ArrayOfString&gt;</Value>
-    </Setting>
     <Setting Name="MaxHistory" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10</Value>
     </Setting>
@@ -29,6 +22,13 @@
     </Setting>
     <Setting Name="DefaultIndexFile" Type="System.String" Scope="User">
       <Value Profile="(Default)">D:\Workspace\BSI\WAResultImageIndex.xml</Value>
+    </Setting>
+    <Setting Name="HistoryFiles" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;C:\WebAdminTest\TestResult\333_03_31_2014\WebAdmin_SH\WAResultImageIndex.xml&lt;/string&gt;
+  &lt;string&gt;C:\WebAdminTest\TestResult\332_03_30_2014\WebAdmin_SH\WAResultImageIndex.xml&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
     </Setting>
   </Settings>
 </SettingsFile>

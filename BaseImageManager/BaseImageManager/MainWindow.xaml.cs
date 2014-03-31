@@ -145,21 +145,44 @@ namespace BaseImageManager
             {
                 var menu = new MenuItem();
                 menu.Header = item.Title;
-                if (item.Items.Count == 0)
-                    menu.Items.Add(new MenuItem() { Header = "Can't find any matched file.", IsEnabled = false });
-                else
-                {
-                    foreach (var file in item.Items)
-                    {
-                        var subMenu = new MenuItem() { Header = file };
-                        subMenu.Click += QuickAccess_Click;
-                        menu.Items.Add(subMenu);
-                    }
-                }
+                //TODO a refresh button at the top of the menu
+                var refresh = new MenuItem() { Header = "Refresh", IsEnabled = true, ToolTip="Refresh to get the latest files", Tag= item };
+                refresh.Click += refresh_Click;
+
+                menu.Items.Add(refresh);
+                menu.Items.Add(new Separator());
+
+                GenerateSubmenu(menu, item.Items);
                 MI_QuickAccess.Items.Add(menu);
             }
 
         }
+
+        void refresh_Click(object sender, RoutedEventArgs e)
+        {
+            var refreshMenu = sender as MenuItem;
+            var parent = refreshMenu.Parent as MenuItem;
+            for (int i = parent.Items.Count - 1; i > 1; i--)
+                parent.Items.RemoveAt(i);
+            var item = refreshMenu.Tag as QuickAccessItem;
+            GenerateSubmenu(parent, item.Items);
+        }
+
+        private void GenerateSubmenu(MenuItem menu, List<string> item)
+        {
+            if (item.Count == 0)
+                menu.Items.Add(new MenuItem() { Header = "Can't find any matched file.", IsEnabled = false });
+            else
+            {
+                foreach (var file in item)
+                {
+                    var subMenu = new MenuItem() { Header = file, ToolTip = file };
+                    subMenu.Click += QuickAccess_Click;
+                    menu.Items.Add(subMenu);
+                }
+            }
+        }
+
         private void AddHistoryItem(string filePath) {
             var curItem = HistoryList.Where(item => item.Equals(filePath, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
             if (curItem != null)

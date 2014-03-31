@@ -38,7 +38,7 @@ namespace BaseImageManager
                     .EnumerateFiles(SearchRule, SearchOption.AllDirectories)
                     .OrderByDescending(file => file.CreationTimeUtc)
                     .Take(MaxCount)
-                    .Select(file => file.Name)
+                    .Select(file => file.FullName)
                     .ToList();
             }
             return new List<string>();
