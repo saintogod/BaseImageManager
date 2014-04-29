@@ -10,10 +10,10 @@ namespace BaseImageManager
 {
     public sealed class QuickAccessItem : ConfigurationElement
     {
-        [ConfigurationProperty("Title", DefaultValue="Quick Access", IsRequired=true)]
-        [StringValidator(MinLength=2, MaxLength=30)]
+        [ConfigurationProperty("Title", DefaultValue = "Quick Access", IsRequired = true)]
+        [StringValidator(MinLength = 2, MaxLength = 30)]
         public string Title { get { return this["Title"] as string; } set { this["Title"] = value; } }
-        [ConfigurationProperty("BaseDir", IsRequired=true)]
+        [ConfigurationProperty("BaseDir", IsRequired = true)]
         public string BaseDir { get { return this["BaseDir"] as string; } set { this["BaseDir"] = value; } }
         [ConfigurationProperty("SearchRule", IsRequired = true)]
         public string SearchRule { get { return this["SearchRule"] as string; } set { this["SearchRule"] = value; } }
@@ -22,15 +22,18 @@ namespace BaseImageManager
         public List<string> Items { get { return GetItems(); } }
 
         public string Name { get { return string.Format("MI_{0}", Title.Replace(' ', '_')); } }
-                public QuickAccessItem()
+
+        public QuickAccessItem()
         { }
+
         public QuickAccessItem(string title, string baseDir, string rule)
         {
             Title = title;
             SearchRule = rule;
             BaseDir = baseDir;
         }
-        private List<string> GetItems() 
+
+        private List<string> GetItems()
         {
             if (Directory.Exists(BaseDir))
             {
