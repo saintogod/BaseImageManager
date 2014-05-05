@@ -139,6 +139,7 @@ namespace BaseImageManager
             }
             return null;
         }
+
         private void BuildQuickAccess()
         {
             foreach (var item in QuickAccessList)
@@ -202,16 +203,19 @@ namespace BaseImageManager
             Properties.Settings.Default.HistoryFiles.AddRange(HistoryList.ToArray());
             Properties.Settings.Default.Save();
         }
+
         private void HistoryItem_Click(object sender, RoutedEventArgs e)
         {
             bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), failedTests);
             AddHistoryItem(((MenuItem)sender).Header.ToString());
         }
+
         private void QuickAccess_Click(object sender, RoutedEventArgs e)
         {
             bussiness.LoadIndexFile(((MenuItem)sender).Header.ToString(), failedTests);
             AddHistoryItem(((MenuItem)sender).Header.ToString());
         }
+
         private void SelectAll_Click(object sender, RoutedEventArgs e)
         {
             foreach (BrowserItem bi in ErrorList.Items)
@@ -303,6 +307,7 @@ namespace BaseImageManager
                 DiffPIC.ImageSource = new BitmapImage(new Uri(diff, UriKind.Absolute));
             }
         }
+
         private BitmapImage LoadImage(string myImageFile)
         {
             BitmapImage myRetVal = null;
@@ -320,6 +325,7 @@ namespace BaseImageManager
             }
             return myRetVal;
         }
+
         private void PictureInShow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount >= 2)
@@ -339,6 +345,7 @@ namespace BaseImageManager
                 }
             }
         }
+        
         private void SmallImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount >= 2)

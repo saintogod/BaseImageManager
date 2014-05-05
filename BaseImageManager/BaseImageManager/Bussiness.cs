@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace BaseImageManager
 {
@@ -16,20 +17,28 @@ namespace BaseImageManager
         Regex expectedIMG = new Regex(@"\\(?<browser>(Chrome|IE9|IE10|Firefox))\\(?<picName>.+).png$");
         public void LoadIndexFile(string indexFile, BindingList<BrowserItem> failedTests)
         {
-            var xdoc = XDocument.Load(indexFile);
+            var xs = new XmlSerializer(typeof(List<TestResult>), new XmlAttributeOverrides(), new Type[] { typeof(TestResult) }, new XmlRootAttribute("TestResults"), @"");
+            var totaltests = new List<TestResult>();
+            using (var stream = new StreamReader(indexFile))
+            {
+                totaltests = xs.Deserialize(stream) as List<TestResult>;
+            }
             failedTests.Clear();
-            var list = from item in xdoc.Root.Elements("TestResult")
-                          where item.Element("Matched").Value == "false"
-                          group item by expectedIMG.Match(item.Element("ExpectedPic").Value).Groups["browser"].Value into g
-                          select new BrowserItem(g.Key, (from node in g
-                                                         let picName = node.Element("ExpectedPic").Value
-                                                         select new ErrorItem()
-                                                         {
-                                                             ExpectedImg = picName,
-                                                             CapturedImg = node.Element("ResultPic").Value,
-                                                             Header = expectedIMG.Match(picName).Groups["picName"].Value
-                                                         }));
-            foreach (var item in list)
+
+            var passedtests = totaltests.Where(test => test.Success).Select(test => test.ExpectedImg);
+
+            var failedtests = from test in totaltests
+                              where !test.Success
+                              group test by expectedIMG.Match(test.ExpectedImg).Groups["browser"].Value into g
+                              select new BrowserItem(g.Key, (from node in g
+                                                             select new ErrorItem { 
+                                                                 ExpectedImg = node.ExpectedImg, 
+                                                                 CapturedImg = node.ResultImg, 
+                                                                 Header = expectedIMG.Match(node.ExpectedImg).Groups["picName"].Value,
+                                                                 ToolTips = node.CaseName, 
+                                                                 Conflict = passedtests.Contains(node.ExpectedImg) }));
+
+            foreach (var item in failedtests)
             {
                 failedTests.Add(item);
             }

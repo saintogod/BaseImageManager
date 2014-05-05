@@ -89,11 +89,13 @@ namespace BaseImageManager
         }
         public string ExpectedImg { get; set; }
         public string CapturedImg { get; set; }
+        public bool Conflict { get; set; }
+        public string ToolTips { get; set; }
         public bool IsChecked
         {
             get
             {
-                return _isChecked;
+                return _isChecked && Conflict;
             }
             set
             {
@@ -119,5 +121,14 @@ namespace BaseImageManager
                 PropertyChanged(this, new PropertyChangedEventArgs(info));
             }
         }
+    }
+
+    public class TestResult
+    {
+        public string ExpectedImg { get; set; }
+        public string ResultImg { get; set; }
+        public bool Success { get; set; }
+        public string CaseName { get; set; }
+        public int Index { get; set; }
     }
 }
