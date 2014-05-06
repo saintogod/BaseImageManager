@@ -15,7 +15,7 @@
         <!--<local:HistoryList x:Key="historys"/>-->
         <HierarchicalDataTemplate x:Key="ErrorItemTemplate" DataType="{x:Type local:ErrorItem}">
             <StackPanel x:Name="errItem" Orientation="Horizontal" MouseLeftButtonUp="errItem_MouseUp" Tag="{Binding}">
-                <CheckBox x:Name="chb" ToolTip="{Binding ToolTips}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Tag="{Binding ExpectedImg}" IsEnabled="{Binding Conflict}"/>
+                <CheckBox x:Name="chb" ToolTip="{Binding ToolTips}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Tag="{Binding ExpectedImg}" IsEnabled="{Binding Path=(!Conflict), Mode=OneWay}"/>
                 <TextBlock x:Name="tb" Tag="{Binding CapturedImg}" ToolTip="{Binding CapturedImg}" Text="{Binding Header}" Margin="2,0,0,0" />
             </StackPanel>
             <HierarchicalDataTemplate.Triggers>

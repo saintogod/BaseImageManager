@@ -263,6 +263,12 @@ namespace BaseImageManager
 
         private void ApplyNewImages_Click(object sender, RoutedEventArgs e)
         {
+            var message = string.Empty;
+            if (bussiness.CheckConflict(failedTests, out message))
+            {
+                new ResultDlg(message).ShowDialog();
+                return;
+            }
            MessageBox.Show(bussiness.ApplyImages(failedTests), "Update Result");
         }
 

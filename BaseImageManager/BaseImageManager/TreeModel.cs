@@ -89,13 +89,14 @@ namespace BaseImageManager
         }
         public string ExpectedImg { get; set; }
         public string CapturedImg { get; set; }
-        public bool Conflict { get; set; }
+        public bool Conflict { get { return !string.IsNullOrEmpty(ConflictWith); } }
+        public string ConflictWith { get; set; }
         public string ToolTips { get; set; }
         public bool IsChecked
         {
             get
             {
-                return _isChecked && Conflict;
+                return _isChecked && !Conflict;
             }
             set
             {
